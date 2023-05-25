@@ -13,6 +13,8 @@ import swaggerUi from 'swagger-ui-express';
 import { Routes } from '@interfaces/routes.interface';
 import errorMiddleware from '@middlewares/error.middleware';
 import { logger, stream } from '@utils/logger';
+import { createConnection } from 'typeorm';
+import { dbConnection } from './databases';
 
 class App {
   public app: express.Application;
@@ -24,6 +26,7 @@ class App {
     this.port = process.env.PORT || 3000;
     this.env = process.env.NODE_ENV || 'development';
 
+    this.env !== 'test' && this.connectToDatabase();
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
     this.initializeSwagger();
@@ -58,6 +61,10 @@ class App {
     routes.forEach(route => {
       this.app.use('/', route.router);
     });
+  }
+
+  private connectToDatabase() {
+    createConnection(dbConnection);
   }
 
   private initializeSwagger() {
