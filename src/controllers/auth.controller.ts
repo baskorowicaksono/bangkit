@@ -162,13 +162,8 @@ class AuthController {
 
   private async hashPassword(password: string) {
     const saltRounds = 10;
-    bcrypt
-      .genSalt(saltRounds)
-      .then(salt => {
-        return bcrypt.hash(password, salt);
-      })
-      .catch(e => {
-        logger.error(new HttpException(500, e));
-      });
+    return bcrypt.genSalt(saltRounds).then(salt => {
+      return bcrypt.hash(password, salt);
+    });
   }
 }
