@@ -1,10 +1,11 @@
 import { User } from '@/interfaces/user.interface';
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, ManyToMany, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 import { nanoid } from 'nanoid';
+import ActivityEntity from './activity.entity';
 
 @Entity()
 class UserEntity implements User {
-  constructor(id = nanoid(32), googleid: string, nama: string, email: string, password: string, picture_url: string, umur: string) {
+  constructor(id = nanoid(32), googleid: string, nama: string, email: string, picture_url: string) {
     this.id = id;
     this.googleid = googleid;
     this.nama = nama;
@@ -38,6 +39,9 @@ class UserEntity implements User {
   @Column()
   @DeleteDateColumn()
   deletedAt: Date;
+
+  @ManyToMany(() => ActivityEntity, activity => activity.users)
+  activities: ActivityEntity[];
 }
 
 export default UserEntity;
