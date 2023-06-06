@@ -4,13 +4,13 @@ import AuthService from '@/services/auth.service';
 import RedisService from '@/services/redis.service';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { RequestWithUser } from '../../../studyboard/studyboard-backend/src/interfaces/auth.interface';
 import { getRepository } from 'typeorm';
 import UserEntity from '@/entity/user.entity';
 import { nanoid } from 'nanoid';
 import TokenInterface from '@/interfaces/token.interface';
 import { OAuth2Client } from 'google-auth-library';
 import { User } from '@/interfaces/user.interface';
+import { RequestWithUser } from '@/interfaces/auth.interface';
 
 const dotenv = require('dotenv');
 dotenv.config();
@@ -183,3 +183,5 @@ class AuthController {
     }
   };
 }
+
+export default AuthController;

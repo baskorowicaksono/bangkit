@@ -10,12 +10,9 @@ import { ILike, getRepository } from 'typeorm';
 class ActivityController {
   public async addActivity(req: RequestWithUser, res: Response, next: NextFunction) {
     const { activity_name, location, description, background_img, users } = req.body;
-    const userId = req.user.userId;
 
     const activityRepository = getRepository(ActivityEntity);
     const userRepository = getRepository(UserEntity);
-
-    const user = await userRepository.findOne(userId);
 
     const newActivity = new ActivityEntity(nanoid(32), activity_name, location, description, background_img);
 
@@ -100,10 +97,10 @@ class ActivityController {
 
   public async getActivityByID(req: RequestWithUser, res: Response, next: NextFunction) {
     const { id } = req.params;
-    const userRepository = getRepository(UserEntity);
     const activityRepository = getRepository(ActivityEntity);
     const findActivity = await activityRepository.findOne({
       where: { id: id },
+      relations: ['users'],
     });
 
     if (findActivity) {
@@ -139,10 +136,105 @@ class ActivityController {
       });
   }
 
-  //   TODOs: develop linkUser, unlinkUser, and getActivityByUser
-  //   public async linkUser(req: RequestWithUser, res: Response, next: NextFunction) {}
+  public async linkUser(req: RequestWithUser, res: Response, next: NextFunction) {
+    const { id } = req.params;
+    const { userId, userName } = req.body;
 
-  //   public async unlinkUser(req: RequestWithUser, res: Response, next: NextFunction) {}
+    const userRepository = getRepository(UserEntity);
+    const activityRepository = getRepository(ActivityEntity);
 
-  //   public async getActivityByUser(req: RequestWithUser, res: Response, next: NextFunction) {}
+    const findActivity = await activityRepository.findOne(id, { relations: ['users'] });
+    if (!findActivity) {
+      next(new HttpException(404, 'activity not found'));
+      return;
+    }
+
+    const findUser = await userRepository.findOne(userId);
+    if (!findUser) {
+      next(new HttpException(404, 'user not found'));
+      return;
+    }
+
+    if (!findActivity.users) {
+      findActivity.users = [];
+    }
+
+    const flag = true;
+    findActivity.users.map(user => {
+      if (user.id === userId) {
+        next(new HttpException(400, 'User already exists in this activity'));
+        return;
+      }
+    });
+    if (!flag) {
+      return;
+    }
+
+    findActivity.users.push(findUser);
+    activityRepository
+      .save(findActivity)
+      .then(r => {
+        res.status(200).send({
+          message: 'Successfully add user: ' + userName + ' to activity: ' + r.activity_name,
+          data: r,
+        });
+      })
+      .catch(e => {
+        next(new HttpException(500, 'Something went wrong: ' + e));
+      });
+  }
+
+  public async unlinkUser(req: RequestWithUser, res: Response, next: NextFunction) {
+    const { id, userId } = req.params;
+    const userRepository = getRepository(UserEntity);
+    const activityRepository = getRepository(ActivityEntity);
+
+    const findActivity = await activityRepository.findOne(id, { relations: ['users'] });
+    if (!findActivity) {
+      next(new HttpException(404, 'Activity not found'));
+      return;
+    }
+
+    const findUser = await userRepository.findOne(userId);
+    if (!findUser) {
+      next(new HttpException(404, 'User not found'));
+      return;
+    }
+    const newUsers = [];
+    findActivity.users.map(user => {
+      if (user.id !== userId) {
+        newUsers.push(user);
+      }
+    });
+    findActivity.users = newUsers;
+
+    activityRepository
+      .save(findActivity)
+      .then(r => {
+        res.status(200).send({
+          message: 'Successfully remove user: ' + userId + ' from activity: ' + r.activity_name,
+          data: r,
+        });
+      })
+      .catch(e => {
+        next(new HttpException(500, 'Something went wrong: ' + e));
+      });
+  }
+
+  public async getActivityByUser(req: RequestWithUser, res: Response, next: NextFunction) {
+    const { allActivities } = req.body;
+    const activityRepository = getRepository(ActivityEntity);
+
+    const findActivities = await activityRepository
+      .createQueryBuilder('activity_entity')
+      .where('activity_entity.id IN(:...activityId)', { activityId: allActivities })
+      .leftJoinAndSelect('activity_entity.users', 'user_entity');
+
+    res.status(200).send({
+      message: 'Berhasil mendapatkan aktivitas',
+      data: findActivities,
+    });
+  }
 }
+
+export default ActivityController;

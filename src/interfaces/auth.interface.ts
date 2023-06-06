@@ -13,7 +13,6 @@ export interface TokenData {
 export interface SessionBody {
   expiryTime: string | Date;
   userId: string;
-  role: string;
 }
 
 export interface RequestWithUser extends Request {
