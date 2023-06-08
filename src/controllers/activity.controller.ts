@@ -2,27 +2,50 @@
 import ActivityEntity from '@/entity/activity.entity';
 import UserEntity from '@/entity/user.entity';
 import { HttpException } from '@/exceptions/HttpException';
+import { ActivityRequest, TypeLocation } from '@/interfaces/activity.interface';
 import { RequestWithUser } from '@/interfaces/auth.interface';
-import { NextFunction, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { nanoid } from 'nanoid';
 import { ILike, getRepository } from 'typeorm';
 
 class ActivityController {
-  public async addActivity(req: RequestWithUser, res: Response, next: NextFunction) {
-    const { activity_name, location, description, background_img, users } = req.body;
+  public async addActivity(req: Request, res: Response, next: NextFunction) {
+    const activityRequest: ActivityRequest = req.body;
 
     const activityRepository = getRepository(ActivityEntity);
     const userRepository = getRepository(UserEntity);
 
-    const newActivity = new ActivityEntity(nanoid(32), activity_name, location, description, background_img);
+    const newActivity = new ActivityEntity(
+      nanoid(32),
+      activityRequest.activity_name,
+      activityRequest.location,
+      activityRequest.description,
+      activityRequest.background_img,
+    );
 
-    if (users) {
+    if (!(activityRequest.location in TypeLocation)) {
+      next(new HttpException(400, 'Invalid location'));
+    }
+
+    const duplicateActivity =
+      (await activityRepository.count({
+        where: {
+          activity_name: activityRequest.activity_name,
+          location: activityRequest.location,
+        },
+      })) > 0;
+    if (duplicateActivity) {
+      next(new HttpException(404, 'Duplicate activity found'));
+      return;
+    }
+
+    if (activityRequest.users) {
       const userList = [];
-      for (let i = 0; i < users.length; i++) {
+      for (let i = 0; i < activityRequest.users.length; i++) {
         const checkUser = await userRepository.findOne({
           where: {
-            id: users[i].id,
-            email: users[i].email,
+            id: activityRequest.users[i].id,
+            email: activityRequest.users[i].email,
           },
         });
         if (checkUser) userList.push(checkUser);
@@ -30,7 +53,7 @@ class ActivityController {
 
       newActivity.users = userList;
 
-      if (users.length === userList.length) {
+      if (activityRequest.users.length === userList.length) {
         activityRepository.save(newActivity).then(async r => {
           res.status(200).send({
             message: 'Successfully add new activity',
@@ -70,11 +93,11 @@ class ActivityController {
     }
 
     const totalActivity = await activityRepository.count({
-      where: { name: ILike(`%${searchKey}%`) },
+      where: { activity_name: ILike(`%${searchKey}%`) },
     });
 
     const allActivity = await activityRepository.find({
-      where: { name: ILike(`%${searchKey}%`) },
+      where: { activity_name: ILike(`%${searchKey}%`) },
       take: pageSize,
       skip: pageNumber & pageSize,
       order: {
@@ -138,7 +161,7 @@ class ActivityController {
 
   public async linkUser(req: RequestWithUser, res: Response, next: NextFunction) {
     const { id } = req.params;
-    const { userId, userName } = req.body;
+    const userId = req.user.userId;
 
     const userRepository = getRepository(UserEntity);
     const activityRepository = getRepository(ActivityEntity);
@@ -175,7 +198,7 @@ class ActivityController {
       .save(findActivity)
       .then(r => {
         res.status(200).send({
-          message: 'Successfully add user: ' + userName + ' to activity: ' + r.activity_name,
+          message: 'Successfully add user: ' + findUser.nama + ' to activity: ' + r.activity_name,
           data: r,
         });
       })
@@ -185,7 +208,8 @@ class ActivityController {
   }
 
   public async unlinkUser(req: RequestWithUser, res: Response, next: NextFunction) {
-    const { id, userId } = req.params;
+    const { id } = req.params;
+    const userId = req.user.userId;
     const userRepository = getRepository(UserEntity);
     const activityRepository = getRepository(ActivityEntity);
 
@@ -221,6 +245,7 @@ class ActivityController {
       });
   }
 
+  // TODO: Fix query for this endpoint
   public async getActivityByUser(req: RequestWithUser, res: Response, next: NextFunction) {
     const { allActivities } = req.body;
     const activityRepository = getRepository(ActivityEntity);
@@ -228,6 +253,7 @@ class ActivityController {
     const findActivities = await activityRepository
       .createQueryBuilder('activity_entity')
       .where('activity_entity.id IN(:...activityId)', { activityId: allActivities })
+      .leftJoinAndSelect('activity_entity.activities', 'user_activities_entity')
       .leftJoinAndSelect('activity_entity.users', 'user_entity');
 
     res.status(200).send({

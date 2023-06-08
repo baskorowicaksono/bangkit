@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, ManyToMany, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinTable, ManyToMany, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 import { Activity, TypeLocation } from '../interfaces/activity.interface';
 import { nanoid } from 'nanoid';
 import UserEntity from './user.entity';
@@ -45,6 +45,17 @@ class ActivityEntity implements Activity {
   deletedAt: Date;
 
   @ManyToMany(() => UserEntity, user => user.activities)
+  @JoinTable({
+    name: 'user_activities_entity',
+    joinColumn: {
+      name: 'activities',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'user',
+      referencedColumnName: 'id',
+    },
+  })
   users: UserEntity[];
 }
 

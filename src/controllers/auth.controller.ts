@@ -33,17 +33,23 @@ class AuthController {
 
     const newUser = new UserEntity(id, newUserRequest.nama, newUserRequest.email, hashed_password, newUserRequest.picture_url);
 
-    userRepository
-      .save(newUser)
-      .then(async r => {
-        res.status(201).send({
-          message: 'Successfully register a new user',
-          data: r,
+    const foundUser = (await userRepository.count({ where: { email: newUserRequest.email } })) > 0;
+    if (!foundUser) {
+      userRepository
+        .save(newUser)
+        .then(async r => {
+          const { password, ...info } = r;
+          res.status(201).send({
+            message: 'Successfully register a new user',
+            data: info,
+          });
+        })
+        .catch(e => {
+          next(new HttpException(500, e));
         });
-      })
-      .catch(e => {
-        next(new HttpException(500, e));
-      });
+    } else {
+      next(new HttpException(400, 'User with registered email already exists'));
+    }
   };
 
   public login = async (req: Request, res: Response, next: NextFunction) => {
@@ -71,8 +77,8 @@ class AuthController {
         message: 'berhasil melakukan autentikasi',
         userStatus: {
           userData: {
-            isRegister: false,
             email: foundUserByEmail.email,
+            nama: foundUserByEmail.nama,
           },
           tokenData: {
             refreshToken: refreshToken,

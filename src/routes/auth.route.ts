@@ -13,7 +13,8 @@ class AuthRoute implements Routes {
   }
 
   private initializeRoutes() {
-    this.router.post(`${this.path}auth/authenticate`, this.authController.googleAuth);
+    this.router.post(`${this.path}auth/register`, this.authController.register);
+    this.router.post(`${this.path}auth/login`, this.authController.login);
     this.router.post(`${this.path}auth/refresh`, this.authController.refreshToken);
     this.router.post(`${this.path}auth/logout`, authMiddleware, this.authController.logOut);
   }
