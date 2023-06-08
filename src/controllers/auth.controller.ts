@@ -9,8 +9,9 @@ import UserEntity from '@/entity/user.entity';
 import { nanoid } from 'nanoid';
 import TokenInterface from '@/interfaces/token.interface';
 import { OAuth2Client } from 'google-auth-library';
-import { User } from '@/interfaces/user.interface';
+import { LoginRequest, UserRequest } from '@/interfaces/user.interface';
 import { RequestWithUser } from '@/interfaces/auth.interface';
+import bcrypt from 'bcrypt';
 
 const dotenv = require('dotenv');
 dotenv.config();
@@ -25,90 +26,69 @@ class AuthController {
     clientSecret: GOOGLE_CLIENT_SECRET,
   });
 
-  public googleAuth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const { tokenId } = req.body;
-      //Throw Exception if tokenId not available
-      if (!tokenId) {
-        next(new HttpException(404, 'tokenid not found!'));
-      }
-      //Authenticate with google
-      this.googleClient
-        .verifyIdToken({
-          idToken: tokenId,
-          audience: GOOGLE_CLIENT_ID,
-        })
-        .then(async respon => {
-          const { email, picture, sub } = respon.getPayload();
-          //Check email
-          const userRepository = getRepository(UserEntity);
-          const findUser = await userRepository.findOne({ where: { email: email }, relations: ['details'] });
-          if (findUser) {
-            const date = new Date();
-            const authObj: RefreshTokenInterface = {
-              expiryTime: new Date(date.getTime() + parseInt(REFRESH_TOKEN_LIFETIME) * 1000),
-              userId: findUser.id,
-            };
-            const refreshToken = this.redisService.setRefreshToken(findUser.id, authObj);
-            authObj.expiryTime = new Date(date.getTime() + parseInt(ACCESS_TOKEN_LIFETIME) * 1000);
-            const accessToken = this.redisService.setAccessToken(findUser.id, authObj);
+  public register = async (req: Request, res: Response, next: NextFunction) => {
+    // get request body and initiate repository
+    const newUserRequest: UserRequest = req.body;
+    const userRepository = getRepository(UserEntity);
 
-            res.status(200).send({
-              message: 'berhasil melakukan autentikasi',
-              userStatus: {
-                userData: {
-                  isRegister: !!findUser.googleid,
-                  email: findUser.email,
-                },
-                tokenData: {
-                  refreshToken: refreshToken,
-                  accessToken: accessToken,
-                  accessTokenExpiryTime: authObj.expiryTime,
-                },
-              },
-            });
-          } else {
-            let newId = nanoid(25);
-            let cekId = await userRepository.findOne({ where: { id: newId } });
-            while (cekId) {
-              newId = nanoid(25);
-              cekId = await userRepository.findOne({ where: { id: newId } });
-            }
-            const newUser: User = {
-              email: email,
-              googleid: sub,
-              id: newId,
-              picture_url: picture,
-            };
+    const id = nanoid(32);
 
-            userRepository.save(newUser);
-            const date = new Date();
-            const authObj: RefreshTokenInterface = {
-              expiryTime: new Date(date.getTime() + parseInt(REFRESH_TOKEN_LIFETIME) * 1000),
-              userId: newUser.id,
-            };
-            const refreshToken = this.redisService.setRefreshToken(newUser.id, authObj);
-            authObj.expiryTime = new Date(date.getTime() + parseInt(ACCESS_TOKEN_LIFETIME) * 1000);
-            const accessToken = this.redisService.setAccessToken(newUser.id, authObj);
+    // hash password
+    const hashed_password = await this.hashPassword(newUserRequest.password);
 
-            res.status(200).send({
-              message: 'berhasil melakukan autentikasi',
-              userStatus: {
-                userData: {
-                  isRegister: false,
-                  email: newUser.email,
-                },
-                tokenData: {
-                  refreshToken: refreshToken,
-                  accessToken: accessToken,
-                  accessTokenExpiryTime: authObj.expiryTime,
-                },
-              },
-            });
-          }
+    const newUser = new UserEntity(id, newUserRequest.nama, newUserRequest.email, hashed_password, newUserRequest.picture_url);
+
+    userRepository
+      .save(newUser)
+      .then(async r => {
+        res.status(201).send({
+          message: 'Successfully register a new user',
+          data: r,
         });
-    } catch (e) {
-      next(e);
+      })
+      .catch(e => {
+        next(new HttpException(500, e));
+      });
+  };
+
+  public login = async (req: Request, res: Response, next: NextFunction) => {
+    const loginRequest: LoginRequest = req.body;
+    const userRepository = getRepository(UserEntity);
+
+    const foundUserByEmail = await userRepository.findOne({ where: { email: loginRequest.email } });
+    if (foundUserByEmail) {
+      // password comparing
+      const isPasswordTrue = await bcrypt.compare(loginRequest.password, foundUserByEmail.password);
+      if (!isPasswordTrue) {
+        next(new HttpException(401, 'Invalid password'));
+      }
+
+      const date = new Date();
+      const authObj: RefreshTokenInterface = {
+        expiryTime: new Date(date.getTime() + parseInt(REFRESH_TOKEN_LIFETIME) * 1000),
+        userId: foundUserByEmail.id,
+      };
+      const refreshToken = this.redisService.setRefreshToken(foundUserByEmail.id, authObj);
+      authObj.expiryTime = new Date(date.getTime() + parseInt(ACCESS_TOKEN_LIFETIME) * 1000);
+      const accessToken = this.redisService.setAccessToken(foundUserByEmail.id, authObj);
+
+      res.status(200).send({
+        message: 'berhasil melakukan autentikasi',
+        userStatus: {
+          userData: {
+            isRegister: false,
+            email: foundUserByEmail.email,
+          },
+          tokenData: {
+            refreshToken: refreshToken,
+            accessToken: accessToken,
+            accessTokenExpiryTime: authObj.expiryTime,
+          },
+        },
+      });
+    } else {
+      next(new HttpException(404, 'User not found with inputed email'));
+      return;
     }
   };
 
@@ -182,6 +162,13 @@ class AuthController {
       next(new HttpException(500, 'Something wrong when trying to logout from server'));
     }
   };
+
+  private async hashPassword(password: string) {
+    const saltRounds = 10;
+    return bcrypt.genSalt(saltRounds).then(salt => {
+      return bcrypt.hash(password, salt);
+    });
+  }
 }
 
 export default AuthController;

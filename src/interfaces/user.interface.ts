@@ -1,7 +1,15 @@
-export interface User {
-  nama?: string;
-  email?: string;
-  picture_url: string;
+export interface User extends UserRequest {
   id: string;
-  googleid: string;
+}
+
+export interface UserRequest {
+  nama: string;
+  email: string;
+  password: string;
+  picture_url: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
 }
