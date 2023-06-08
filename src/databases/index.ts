@@ -19,6 +19,5 @@ export const dbConnection: ConnectionOptions = {
   cli: {
     entitiesDir: 'src/entity',
     migrationsDir: 'src/migration',
-    subscribersDir: 'src/subscriber',
   },
 };
