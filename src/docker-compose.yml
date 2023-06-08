@@ -1,0 +1,47 @@
+version: '3.7'
+
+services:
+  server:
+    build:
+      context: ./
+      target: development-build-stage
+      dockerfile: Dockerfile
+    container_name: server
+    ports:
+      - '4000:4000'
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    restart: 'unless-stopped'
+    networks:
+      - backend
+    links:
+      - pg
+    depends_on:
+      - pg
+  pg:
+    image: bitnami/postgresql:11-debian-9
+    container_name: pg
+    environment:
+      POSTGRESQL_USERNAME: testtest
+      POSTGRESQL_PASSWORD: asdf1234
+      POSTGRESQL_DATABASE: travis
+    ports:
+      - '3500:5432'
+    networks:
+      - backend
+  redizz:
+    image: redis:alpine
+    container_name: redizz
+    ports:
+      - '3600:6379'
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  data:
+    driver: local
