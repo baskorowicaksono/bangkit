@@ -8,7 +8,6 @@ import { getRepository } from 'typeorm';
 import UserEntity from '@/entity/user.entity';
 import { nanoid } from 'nanoid';
 import TokenInterface from '@/interfaces/token.interface';
-import { OAuth2Client } from 'google-auth-library';
 import { LoginRequest, UserRequest } from '@/interfaces/user.interface';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 import bcrypt from 'bcrypt';
@@ -16,15 +15,11 @@ import bcrypt from 'bcrypt';
 const dotenv = require('dotenv');
 dotenv.config();
 
-const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REFRESH_TOKEN_LIFETIME, ACCESS_TOKEN_LIFETIME, JWT_KEY } = process.env;
+const { REFRESH_TOKEN_LIFETIME, ACCESS_TOKEN_LIFETIME, JWT_KEY } = process.env;
 
 class AuthController {
   public authService = new AuthService();
   public redisService = new RedisService();
-  public googleClient = new OAuth2Client({
-    clientId: GOOGLE_CLIENT_ID,
-    clientSecret: GOOGLE_CLIENT_SECRET,
-  });
 
   public register = async (req: Request, res: Response, next: NextFunction) => {
     // get request body and initiate repository
