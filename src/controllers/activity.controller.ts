@@ -132,7 +132,7 @@ class ActivityController {
         data: findActivity,
       });
     } else {
-      next(new HttpException(404, 'This course does not exist'));
+      next(new HttpException(404, 'This activity does not exist'));
     }
   }
 
@@ -245,21 +245,36 @@ class ActivityController {
       });
   }
 
-  // TODO: Fix query for this endpoint
   public async getActivityByUser(req: RequestWithUser, res: Response, next: NextFunction) {
-    const { allActivities } = req.body;
+    const { pg, pgsize, userId } = req.query;
     const activityRepository = getRepository(ActivityEntity);
 
-    const findActivities = await activityRepository
-      .createQueryBuilder('activity_entity')
-      .where('activity_entity.id IN(:...activityId)', { activityId: allActivities })
-      .leftJoinAndSelect('activity_entity.activities', 'user_activities_entity')
-      .leftJoinAndSelect('activity_entity.users', 'user_entity');
+    let currPage = 0;
+    let pageSize = 20;
+    if (typeof pg === 'string') {
+      currPage = pg ? parseInt(pg) : 0;
+    }
+    if (typeof pgsize === 'string') {
+      pageSize = pgsize ? parseInt(pgsize) : 20;
+    }
 
-    res.status(200).send({
-      message: 'Berhasil mendapatkan aktivitas',
-      data: findActivities,
-    });
+    const findActivities = await activityRepository.query(
+      `SELECT ae.*, uae.user FROM activity_entity ae
+      LEFT JOIN user_activities_entity uae ON ae.id = uae.activities
+      WHERE uae.user ='${userId}' AND ae."deletedAt" IS NULL
+      LIMIT ${pageSize}
+      OFFSET ${currPage * pageSize}`,
+    );
+
+    if (findActivities.length > 0) {
+      res.status(200).send({
+        message: 'Berhasil mendapatkan aktivitas',
+        data: findActivities,
+      });
+    } else {
+      next(new HttpException(404, 'Data not found'));
+      return;
+    }
   }
 }
 
