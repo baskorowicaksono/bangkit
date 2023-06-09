@@ -1,0 +1,18 @@
+{
+    "env": "development",
+      "dbConfig": {
+        "host": "localhost",
+        "user": "postgres",
+        "password": "root",
+        "database": "travis"
+      },
+      "log": {
+        "format": "dev",
+        "dir": "../logs"
+      },
+      "cors": {
+        "origin": "*",
+        "credentials": false
+      }
+    }
+    

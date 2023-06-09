@@ -117,8 +117,4 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-src/configs/development.json
 src/configs/production.json
-./src/configs/development.json
-./src/configs/production.json
-development.json
