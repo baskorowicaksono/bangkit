@@ -2,8 +2,8 @@
     "env": "development",
       "dbConfig": {
         "host": "localhost",
-        "user": "postgres",
-        "password": "root",
+        "user": "testtest",
+        "password": "asdf1234",
         "database": "travis"
       },
       "log": {
