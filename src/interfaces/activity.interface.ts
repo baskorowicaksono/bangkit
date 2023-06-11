@@ -12,7 +12,10 @@ export interface Activity extends ActivityRequest {
 export interface ActivityRequest {
   activity_name: string;
   location: TypeLocation;
-  description?: string;
-  background_img?: string;
+  description: string;
+  background_img: string;
+  gmap_link: string;
+  start_time: Date;
+  end_time: Date;
   users?: UserEntity[];
 }

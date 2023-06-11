@@ -21,6 +21,9 @@ class ActivityController {
       activityRequest.location,
       activityRequest.description,
       activityRequest.background_img,
+      activityRequest.gmap_link,
+      activityRequest.start_time,
+      activityRequest.end_time,
     );
 
     if (!(activityRequest.location.toUpperCase() in TypeLocation)) {
@@ -56,7 +59,7 @@ class ActivityController {
 
       if (activityRequest.users.length === userList.length) {
         activityRepository.save(newActivity).then(async r => {
-          res.status(200).send({
+          res.status(201).send({
             message: 'Successfully add new activity',
             data: r,
           });
@@ -66,7 +69,7 @@ class ActivityController {
       activityRepository
         .save(newActivity)
         .then(async r => {
-          res.status(200).send({
+          res.status(201).send({
             message: 'Successfully add new activity',
             data: r,
           });
@@ -78,12 +81,12 @@ class ActivityController {
   }
 
   public async getActivity(req: RequestWithUser, res: Response, next: NextFunction) {
-    const { page, activity_name, pagesize, sort } = req.query;
+    const { page, city, pagesize, sort } = req.query;
     const activityRepository = getRepository(ActivityEntity);
     // @ts-ignore
     const pageSize = pagesize ? parseInt(pagesize) : 10;
     // @ts-ignore
-    const searchKey: string = activity_name == null || typeof activity_name == 'undefined' ? '' : activity_name;
+    const searchKey: string = city == null || typeof city == 'undefined' ? '' : city.toString().toUpperCase() in TypeLocation ? city : '';
     let pageNumber: number;
     if (typeof page === 'string') {
       pageNumber = typeof page == 'undefined' ? 0 : parseInt(page);
@@ -94,15 +97,15 @@ class ActivityController {
     }
 
     const totalActivity = await activityRepository.count({
-      where: { activity_name: ILike(`%${searchKey}%`) },
+      where: { city: ILike(`%${searchKey}%`) },
     });
 
     const allActivity = await activityRepository.find({
-      where: { activity_name: ILike(`%${searchKey}%`) },
+      where: { city: ILike(`%${searchKey}%`) },
       take: pageSize,
       skip: pageNumber & pageSize,
       order: {
-        activity_name: sort === 'DESC' ? 'DESC' : 'ASC',
+        location: sort === 'DESC' ? 'DESC' : 'ASC',
       },
     });
 
