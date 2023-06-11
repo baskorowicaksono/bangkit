@@ -94,12 +94,12 @@ class HighlightedDestinationController {
     try {
       const destinationId = req.params.id;
       const repository = getRepository(HighlightedDestinationEntity);
-      const userData = await repository.findOne({
+      const data = await repository.findOne({
         where: { id: destinationId },
       });
 
       res.status(200).json({
-        data: userData,
+        data: data,
         message: 'Berhasil menemukan destinasi',
       });
     } catch (error) {
