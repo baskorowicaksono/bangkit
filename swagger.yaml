@@ -1,0 +1,275 @@
+# Auth section
+paths:
+  /auth/register:
+    post:
+      tags:
+      - authentication
+      summary: Register a new user
+      parameters:
+      - name: Request
+        in: body
+        description: Menambahkan user baru
+        required: true
+        schema:
+          $ref: '#/definitions/registration'
+      responses:
+        200:
+          description: 'Berhasil'
+        500:
+          description: 'Server Error'
+
+  /auth/login:
+    post:
+      tags:
+      - authentication
+      summary: Login to user session
+      parameters:
+      - name: Request
+        in: body
+        description: Login to app
+        required: true
+        schema:
+          $ref: '#/definitions/login'
+      responses:
+        200:
+          description: 'Berhasil'
+        400:
+          description: "Bad Request"
+        404:
+          description: "User not found"
+        500:
+          description: 'Server Error'
+
+  /auth/refresh:
+    post:
+      tags:
+        - authentication
+      summary: Refresh access token
+      parameters:
+        - name: body
+          in: body
+          description: refresh access_token
+          required: true
+          schema:
+            type: object
+      security:
+        - RefreshTokenAuth: [ ]
+        - AccessTokenAuth: [ ]
+      responses:
+        200:
+          description: 'tokenData: {
+                        accessToken: currAccessToken,
+                        accessTokenExpiryTime: accessObj.expiryTime,
+                        refreshToken: refreshToken
+                      }'
+        401:
+          description: 'Token is expire not available'
+        500:
+          description: 'Server Error'
+
+  /auth/logout:
+    post:
+      tags:
+        - authentication
+      summary: Clear user session from backend service
+      parameters:
+        - name: body
+          in: body
+          description: remove user session from redis-backend
+          required: true
+          schema:
+            type: object
+      security:
+        - RefreshTokenAuth: [ ]
+        - AccessTokenAuth: [ ]
+      responses:
+        200:
+          description: 'Berhasil menghapus sesi user'
+        500:
+          description: 'Server Error'
+
+#User Section
+  /users:
+    get:
+      tags:
+        - users
+      summary: Get All Users
+      parameters:
+        - name: pgsize
+          in: query
+          description: size for each pagination
+          required: false
+        - name: pg
+          in: query
+          description: page pointer, start from 0
+          required: false
+      security:
+        - RefreshTokenAuth: [ ]
+        - AccessTokenAuth: [ ]
+      responses:
+        200:
+          description: 'Berhasil'
+        404:
+          description: "No user found"
+        500:
+          description: 'Server Error'
+
+  /users/{userId}:
+    get:
+      tags:
+        - users
+      summary: get User by userId
+      parameters:
+        - name: userId
+          in: params
+          description: userId to search for
+          required: true
+      security:
+        - RefreshTokenAuth: [ ]
+        - AccessTokenAuth: [ ]
+      responses:
+        200:
+          description: 'Berhasil'
+        404:
+          description: "User not found"
+        500:
+          description: 'Server Error'
+
+  /users/self:
+    get:
+      tags:
+        - users
+      summary: get detail of currently logged in user
+      security:
+        - RefreshTokenAuth: [ ]
+        - AccessTokenAuth: [ ]
+      responses:
+        200:
+          description: 'Berhasil'
+        500:
+          description: 'Server Error'
+
+  /users/self/:
+    put:
+      tags:
+        - users
+      summary: edit detail of currently logged in user
+      security:
+        - RefreshTokenAuth: [ ]
+        - AccessTokenAuth: [ ]
+      parameters:
+        - name: userId
+          in: params
+          description: userId for specific admin
+          required: true
+        - name: isDelete
+          in: query
+          description: use this query for removing from admin, don't use if wanna revive this user to admin again
+          required: false
+      responses:
+        200:
+          description: 'Berhasil'
+        500:
+          description: 'Server Error'
+
+  /head-admin/get-admin-by-id/{userId}:
+    get:
+      tags:
+        - head-admin
+      summary: get admin studyboard website with their id
+      parameters:
+        - name: userId
+          in: params
+          description: id from specific user
+          required: true
+      security:
+        - RefreshTokenAuth: [ ]
+        - AccessTokenAuth: [ ]
+      responses:
+        200:
+          description: 'Berhasil'
+        500:
+          description: 'Server Error'
+  /head-admin/update-admin/{userId}:
+    put:
+      tags:
+        - head-admin
+      summary: Clear user session from backend service
+      parameters:
+        - name: userId
+          in: params
+          description: userId for specific admin
+          required: true
+        - name: isDelete
+          in: query
+          description: use this query for removing from admin, don't use if wanna revive this user to admin again
+          required: false
+      security:
+        - RefreshTokenAuth: [ ]
+        - AccessTokenAuth: [ ]
+      responses:
+        200:
+          description: 'Berhasil'
+        404:
+          description: 'Admin not found or hasnt been registered before'
+        500:
+          description: 'Server Error'
+# definitions
+definitions:
+  registration:
+    type: object
+    required:
+      - nama
+      - email
+      - password
+      - gender
+      - age
+      - travel_preferences
+    properties:
+      nama:
+        type: string
+        description: name of user
+      email:
+        type: string
+        description: email of user
+      password:
+        type: string
+        description: password of user account
+      gender:
+        type: string
+        description: gender of user (valid value is only Male, Female, or Other)
+      age:
+        type: integer
+        description: age of user
+      travel_preferences:
+        type: array
+        items:
+          type: string
+        description: user preferences for traveling recommendations.
+
+  login:
+    type: object
+    required:
+      - email
+      - password
+    properties:
+      email:
+        type: string
+        description: email of user
+      password:
+        type: string
+        description: password of user account
+
+securityDefinitions:
+  RefreshTokenAuth:
+    type: apiKey
+    in: header
+    name: Refresh_Token
+  AccessTokenAuth:
+    type: apiKey
+    in: header
+    name: Access_Token
+
+
+schemes:
+ - http

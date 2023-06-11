@@ -69,7 +69,7 @@ class HighlightedDestinationController {
 
       // @ts-ignore
       const [destinationData, nDestinationsData] = await repository.findAndCount({
-        where: { city: ILike(`%${searchKey}%`) },
+        where: { location: ILike(`%${searchKey}%`) },
         skip: offsetSize * offset,
         take: offsetSize,
         order: {

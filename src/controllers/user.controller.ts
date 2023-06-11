@@ -9,13 +9,12 @@ class UserController {
     try {
       let offsetSize = 10;
       const repository = getRepository(UserEntity);
-      const { q, page, id, pagesize } = req.params;
+      const { page, pagesize } = req.params;
       const offset: number = page ? parseInt(page) : 0;
       offsetSize = pagesize ? parseInt(pagesize) : offsetSize;
       // @ts-ignore
       const [usersData, nUsersData] = await repository.findAndCount({
         relations: ['activities'],
-        where: [{ email: Like(`%${q}%`) }, { id: Like(`%${id}%`) }],
         skip: offsetSize * offset,
         take: offsetSize,
       });

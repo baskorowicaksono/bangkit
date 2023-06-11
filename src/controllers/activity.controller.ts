@@ -31,6 +31,11 @@ class ActivityController {
       return;
     }
 
+    if (activityRequest.start_time > activityRequest.end_time) {
+      next(new HttpException(400, 'Invalid activity time/duration'));
+      return;
+    }
+
     const duplicateActivity =
       (await activityRepository.count({
         where: {
@@ -102,7 +107,7 @@ class ActivityController {
     }
 
     const [allActivity, totalActivity] = await activityRepository.findAndCount({
-      where: { city: ILike(`%${searchKey}%`) },
+      where: { location: ILike(`%${searchKey}%`) },
       take: pageSize,
       skip: pageNumber & pageSize,
       order: {

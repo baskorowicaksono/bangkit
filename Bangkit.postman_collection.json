@@ -1,0 +1,588 @@
+{
+	"info": {
+		"_postman_id": "1132d382-105f-49e9-924d-388477cab052",
+		"name": "Bangkit",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "16139130"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nama\" : \"test123456\",\r\n    \"email\": \"test123456@gmail.com\",\r\n    \"password\": \"123456\",\r\n    \"gender\": \"Female\",\r\n    \"age\" : 20,\r\n    \"travel_preferences\": [\"Beach\", \"Diving\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"test123456@gmail.com\",\r\n    \"password\": \"123456\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Activity",
+			"item": [
+				{
+					"name": "Add Activity",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Access_Token",
+								"value": "{{Access_Token}}",
+								"type": "text"
+							},
+							{
+								"key": "Refresh_Token",
+								"value": "{{Refresh_Token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"activity_name\" : \"Makan\",\r\n    \"location\" : \"Yogyakarta\",\r\n    \"description\": \"Lorem ipsum testing\",\r\n    \"background_img\": \"\",\r\n    \"gmap_link\": \"\",\r\n    \"start_time\": \"2023-06-11 10:00:00\",\r\n    \"end_time\": \"2023-06-11 11:00:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/activity/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"activity",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Activities",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/activity",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"activity"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Activity By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/activity/{{activity_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"activity",
+								"{{activity_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Link User to Activity",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Access_Token",
+								"value": "{{Access_Token}}",
+								"type": "text"
+							},
+							{
+								"key": "Refresh_Token",
+								"value": "{{Refresh_Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/activity/{{activity_id}}/link",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"activity",
+								"{{activity_id}}",
+								"link"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Unlink User from Activity",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Access_Token",
+								"value": "{{Access_Token}}",
+								"type": "text"
+							},
+							{
+								"key": "Refresh_Token",
+								"value": "{{Refresh_Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/activity/{{activity_id}}/unlink",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"activity",
+								"{{activity_id}}",
+								"unlink"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Activities By User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Access_Token",
+								"value": "{{Access_Token}}",
+								"type": "text"
+							},
+							{
+								"key": "Refresh_Token",
+								"value": "{{Refresh_Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/activity/user/find?userId={{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"activity",
+								"user",
+								"find"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "{{user_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Access_Token",
+								"value": "{{Access_Token}}",
+								"type": "text"
+							},
+							{
+								"key": "Refresh_Token",
+								"value": "{{Refresh_Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by Id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Access_Token",
+								"value": "{{Access_Token}}",
+								"type": "text"
+							},
+							{
+								"key": "Refresh_Token",
+								"value": "{{Refresh_Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{user_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Self User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Access_Token",
+								"value": "{{Access_Token}}",
+								"type": "text"
+							},
+							{
+								"key": "Refresh_Token",
+								"value": "{{Refresh_Token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/users/self",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"self"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Edit Self User Data",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Access_Token",
+								"value": "{{Access_Token}}",
+								"type": "text"
+							},
+							{
+								"key": "Refresh_Token",
+								"value": "{{Refresh_Token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nama\" : \"Updated test123456\",\r\n    \"gender\": \"Male\",\r\n    \"age\" : 21,\r\n    \"travel_preferences\" : [\"Mountain\", \"Sunrise\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/users/self",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"self"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Highlighted Destination",
+			"item": [
+				{
+					"name": "Add new Destination",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Access_Token",
+								"value": "{{Access_Token}}",
+								"type": "text"
+							},
+							{
+								"key": "Refresh_Token",
+								"value": "{{Refresh_Token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"destination_name\" : \"Parangtritis\",\r\n    \"location\" : \"Yogyakarta\",\r\n    \"description\": \"Lorem ipsum testing\",\r\n    \"background_img\": \"\",\r\n    \"gmap_link\": \"\",\r\n    \"image_gallery\" : [\"1\", \"2\", \"3\"],\r\n    \"activity\": [\"1\", \"2\", \"3\"],\r\n    \"contact_number\" : \"0812112345546\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/destination/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"destination",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Highlighted Destination",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/destination/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"destination",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Destination by Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/destination/{{destination_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"destination",
+								"{{destination_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Travel Service",
+			"item": [
+				{
+					"name": "Add new Travel Service",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Access_Token",
+								"value": "{{Access_Token}}",
+								"type": "text"
+							},
+							{
+								"key": "Refresh_Token",
+								"value": "{{Refresh_Token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"service_name\" : \"Taksi Online\",\r\n    \"location\" : \"Yogyakarta\",\r\n    \"description\": \"Lorem ipsum testing\",\r\n    \"service_provider\" : \"Gojek\",\r\n    \"service_price\": 10000,\r\n    \"background_img\": \"\",\r\n    \"gmap_link\": \"\",\r\n    \"image_gallery\" : [\"1\", \"2\", \"3\"],\r\n    \"contact_number\" : \"0812112345546\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/travel/service",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"travel",
+								"service"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Travel Services",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/travel/service",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"travel",
+								"service"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Travel Service By Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/travel/service/{{service_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"travel",
+								"service",
+								"{{service_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "Refresh_Token",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHBpcnlUaW1lIjoiMjAyMy0wNi0xMFQwNDoxNTo0Ny45OTJaIiwidXNlcklkIjoiM2wwMFV4dWxNUVRzRmVSYXdVRzlsbzlKeS15a2JueTUiLCJpYXQiOjE2ODYyODQxNDd9.ACgtTyAH_x6irKN1cEVlA5whL2n-lpEKTLvYUup5NjQ",
+			"type": "string"
+		},
+		{
+			"key": "Access_Token",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHBpcnlUaW1lIjoiMjAyMy0wNi0wOVQwNjo0NTo0Ny45OTJaIiwidXNlcklkIjoiM2wwMFV4dWxNUVRzRmVSYXdVRzlsbzlKeS15a2JueTUiLCJpYXQiOjE2ODYyODQxNDd9.BIzK31bYUSrn5Qrtfi-ay79Zt-qhnFbm3489J6qQAlQ",
+			"type": "string"
+		},
+		{
+			"key": "base_url",
+			"value": "http://localhost:4000",
+			"type": "string"
+		},
+		{
+			"key": "activity_id",
+			"value": "Hf8Q1JsLdcOc2bvasrIDWfBMFU9D0WOi",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "rpR4FhaKr0WrRpAWHsb2qZ9h4yJCb2VL",
+			"type": "string"
+		},
+		{
+			"key": "destination_id",
+			"value": "7xE2bTpxvZMihH0EsEs28pFhRmL3BTvB",
+			"type": "string"
+		},
+		{
+			"key": "service_id",
+			"value": "_pNEoaxwl_PZBdoh-olwkvIhXBVXCue6",
+			"type": "string"
+		}
+	]
+}

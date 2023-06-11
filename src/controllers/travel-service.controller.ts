@@ -71,7 +71,7 @@ class TravelServiceController {
 
       // @ts-ignore
       const [travelServiceData, nTravelServiceData] = await repository.findAndCount({
-        where: { city: ILike(`%${searchKey}%`) },
+        where: { location: ILike(`%${searchKey}%`) },
         skip: offsetSize * offset,
         take: offsetSize,
         order: {

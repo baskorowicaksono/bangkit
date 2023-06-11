@@ -1,5 +1,6 @@
 import HighlightedDestinationController from '@/controllers/highlighted-destination.controller';
 import { Routes } from '@/interfaces/routes.interface';
+import authMiddleware from '@/middlewares/auth.middleware';
 import { Router } from 'express';
 
 class HighlightedDestinationRoute implements Routes {
@@ -12,7 +13,7 @@ class HighlightedDestinationRoute implements Routes {
   }
 
   private initializeRoutes() {
-    this.router.post(`${this.path}`, this.destinationController.addDestination);
+    this.router.post(`${this.path}`, authMiddleware, this.destinationController.addDestination);
     this.router.get(`${this.path}`, this.destinationController.getDestinations);
     this.router.get(`${this.path}/:id`, this.destinationController.getDestinationById);
   }
