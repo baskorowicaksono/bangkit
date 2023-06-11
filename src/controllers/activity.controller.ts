@@ -86,7 +86,12 @@ class ActivityController {
     // @ts-ignore
     const pageSize = pagesize ? parseInt(pagesize) : 10;
     // @ts-ignore
-    const searchKey: string = city == null || typeof city == 'undefined' ? '' : city.toString().toUpperCase() in TypeLocation ? city : '';
+    const searchKey: string = city == null || typeof city == 'undefined' ? '' : city.toString().toUpperCase() in TypeLocation ? city : 'Invalid';
+    if (searchKey == 'Invalid') {
+      next(new HttpException(400, 'Search key error: Invalid city.'));
+      return;
+    }
+
     let pageNumber: number;
     if (typeof page === 'string') {
       pageNumber = typeof page == 'undefined' ? 0 : parseInt(page);
@@ -96,11 +101,7 @@ class ActivityController {
       pageNumber = 0;
     }
 
-    const totalActivity = await activityRepository.count({
-      where: { city: ILike(`%${searchKey}%`) },
-    });
-
-    const allActivity = await activityRepository.find({
+    const [allActivity, totalActivity] = await activityRepository.findAndCount({
       where: { city: ILike(`%${searchKey}%`) },
       take: pageSize,
       skip: pageNumber & pageSize,

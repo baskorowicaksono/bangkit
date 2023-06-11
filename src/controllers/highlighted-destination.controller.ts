@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { NextFunction, Request, Response } from 'express';
-import { getRepository } from 'typeorm';
+import { ILike, getRepository } from 'typeorm';
 import HighlightedDestinationEntity from '../entity/highlighted-destination.entity';
 import { HighlightedDestinationRequest } from '@/interfaces/highlighted-destination.interface';
 import { nanoid } from 'nanoid';
@@ -57,13 +57,24 @@ class HighlightedDestinationController {
     try {
       let offsetSize = 10;
       const repository = getRepository(HighlightedDestinationEntity);
-      const { page, pagesize } = req.params;
+      const { city, page, pagesize, sort } = req.params;
       const offset: number = page ? parseInt(page) : 0;
       offsetSize = pagesize ? parseInt(pagesize) : offsetSize;
+
+      const searchKey: string = city == null || typeof city == 'undefined' ? '' : city.toString().toUpperCase() in TypeLocation ? city : 'Invalid';
+      if (searchKey == 'Invalid') {
+        next(new HttpException(400, 'Search key error: Invalid city.'));
+        return;
+      }
+
       // @ts-ignore
       const [destinationData, nDestinationsData] = await repository.findAndCount({
+        where: { city: ILike(`%${searchKey}%`) },
         skip: offsetSize * offset,
         take: offsetSize,
+        order: {
+          location: sort === 'DESC' ? 'DESC' : 'ASC',
+        },
       });
       res.status(200).json({
         data: {
