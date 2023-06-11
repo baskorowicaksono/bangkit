@@ -8,7 +8,7 @@ import { getRepository } from 'typeorm';
 import UserEntity from '@/entity/user.entity';
 import { nanoid } from 'nanoid';
 import TokenInterface from '@/interfaces/token.interface';
-import { LoginRequest, UserRequest } from '@/interfaces/user.interface';
+import { LoginRequest, TypeGender, UserRequest } from '@/interfaces/user.interface';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 import bcrypt from 'bcrypt';
 
@@ -31,7 +31,21 @@ class AuthController {
     // hash password
     const hashed_password = await this.hashPassword(newUserRequest.password);
 
-    const newUser = new UserEntity(id, newUserRequest.nama, newUserRequest.email, hashed_password, newUserRequest.picture_url);
+    const newUser = new UserEntity(
+      id,
+      newUserRequest.nama,
+      newUserRequest.email,
+      hashed_password,
+      newUserRequest.gender,
+      newUserRequest.age,
+      newUserRequest.travel_preferences,
+      newUserRequest.picture_url,
+    );
+
+    if (!(newUserRequest.gender.toUpperCase() in TypeGender)) {
+      next(new HttpException(400, 'Gender not valid'));
+      return;
+    }
 
     const foundUser = (await userRepository.count({ where: { email: newUserRequest.email } })) > 0;
     if (!foundUser) {

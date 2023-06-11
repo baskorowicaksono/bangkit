@@ -23,8 +23,9 @@ class ActivityController {
       activityRequest.background_img,
     );
 
-    if (!(activityRequest.location in TypeLocation)) {
+    if (!(activityRequest.location.toUpperCase() in TypeLocation)) {
       next(new HttpException(400, 'Invalid location'));
+      return;
     }
 
     const duplicateActivity =
@@ -80,7 +81,7 @@ class ActivityController {
     const { page, activity_name, pagesize, sort } = req.query;
     const activityRepository = getRepository(ActivityEntity);
     // @ts-ignore
-    const pageSize = pagesize ? parseInt(pagesize) : 5;
+    const pageSize = pagesize ? parseInt(pagesize) : 10;
     // @ts-ignore
     const searchKey: string = activity_name == null || typeof activity_name == 'undefined' ? '' : activity_name;
     let pageNumber: number;

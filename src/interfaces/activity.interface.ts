@@ -1,8 +1,8 @@
 import UserEntity from '@/entity/user.entity';
 
 export enum TypeLocation {
-  Jakarta = 'jakarta',
-  Yogyakarta = 'yogyakarta',
+  JAKARTA = 'Jakarta',
+  YOGYAKARTA = 'Yogyakarta',
 }
 
 export interface Activity extends ActivityRequest {

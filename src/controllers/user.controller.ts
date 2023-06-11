@@ -8,7 +8,7 @@ import { Like, getRepository } from 'typeorm';
 class UserController {
   public getUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      let offsetSize = 20;
+      let offsetSize = 10;
       const repository = getRepository(UserEntity);
       const { q, page, id, pagesize } = req.params;
       const offset: number = page ? parseInt(page) : 0;
